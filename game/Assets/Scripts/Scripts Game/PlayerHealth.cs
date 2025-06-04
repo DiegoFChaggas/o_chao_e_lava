@@ -8,16 +8,32 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Transform que representa o último checkpoint atingido")]
     public Transform respawnPoint;
 
+    public GameObject gameOverPanel; // <-- UI de "Você perdeu! Pressione F"
+    
     private CharacterController controller;
+    private bool isDead = false;
 
     void Start()
     {
         currentHealth = maxHealth;
         controller = GetComponent<CharacterController>();
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+    }
+
+    void Update()
+    {
+        if (isDead && Input.GetKeyDown(KeyCode.F))
+        {
+            Respawn();
+        }
     }
 
     public void TakeDamage(int damage)
     {
+        if (isDead) return;
+
         currentHealth -= damage;
 
         if (currentHealth <= 0)
@@ -28,9 +44,21 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
-        currentHealth = maxHealth;
+        currentHealth = 0;
+        isDead = true;
 
-        // Respawn
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
+    }
+
+    private void Respawn()
+    {
+        currentHealth = maxHealth;
+        isDead = false;
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+
         if (respawnPoint != null)
         {
             controller.enabled = false;
